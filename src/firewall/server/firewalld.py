@@ -263,6 +263,7 @@ class FirewallD(slip.dbus.service.Object):
 
         self.fw.reload()
         self.config.reload()
+        log.info1("Reloaded.")
         self.Reloaded()
 
     # complete_reload
@@ -281,6 +282,7 @@ class FirewallD(slip.dbus.service.Object):
 
         self.fw.reload(True)
         self.config.reload()
+        log.info1("Reloaded completely.")
         self.Reloaded()
 
     @dbus.service.signal(config.dbus.DBUS_INTERFACE)
@@ -440,6 +442,8 @@ class FirewallD(slip.dbus.service.Object):
         if error:
             raise FirewallError(errors.RT_TO_PERM_FAILED)
 
+        log.info1("Copied runtime to permanent config.")
+
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # POLICIES
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -456,6 +460,7 @@ class FirewallD(slip.dbus.service.Object):
         log.debug1("policies.enableLockdown()")
         self.accessCheck(sender)
         self.fw.policies.enable_lockdown()
+        log.info1("Lockdown enabled.")
         self.LockdownEnabled()
 
     @slip.dbus.polkit.require_auth(config.dbus.PK_ACTION_POLICIES)
@@ -468,6 +473,7 @@ class FirewallD(slip.dbus.service.Object):
         log.debug1("policies.disableLockdown()")
         self.accessCheck(sender)
         self.fw.policies.disable_lockdown()
+        log.info1("Lockdown disabled.")
         self.LockdownDisabled()
 
     @slip.dbus.polkit.require_auth(config.dbus.PK_ACTION_POLICIES_INFO)

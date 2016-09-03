@@ -95,6 +95,7 @@ class modules(object):
 
     def unload_firewall_modules(self):
         """ unload all firewall-related modules """
+        log.info1("Unloading all firewall-related modules...")
         for module in self.get_firewall_modules():
             (status, ret) = self.unload_module(module)
             if status != 0:

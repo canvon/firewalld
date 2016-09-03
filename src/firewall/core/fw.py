@@ -394,6 +394,7 @@ class Firewall(object):
             log.debug2("Flushing and applying took %f seconds" % (tm2 - tm1))
 
         self._state = "RUNNING"
+        log.info1("Firewall reached state '%s'.", self._state)
 
     def start(self):
         self._start()
@@ -542,6 +543,9 @@ class Firewall(object):
             self.flush()
             self.set_policy("ACCEPT")
             self.modules_backend.unload_firewall_modules()
+            log.info1("Finished CleanupOnExit.")
+        else:
+            log.info1("Skipping CleanupOnExit.")
 
         self.cleanup()
 
@@ -1018,6 +1022,8 @@ class Firewall(object):
             raise FirewallError(errors.ALREADY_ENABLED,
                                 "panic mode already enabled")
 
+        log.warning("Enabling panic mode!")
+
         # TODO: use rule in raw table not default chain policy
         try:
             self.set_policy("DROP", "all")
@@ -1029,6 +1035,8 @@ class Firewall(object):
         if not self._panic:
             raise FirewallError(errors.NOT_ENABLED,
                                 "panic mode is not enabled")
+
+        log.warning("Disabling panic mode!")
 
         # TODO: use rule in raw table not default chain policy
         try:
