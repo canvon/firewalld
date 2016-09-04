@@ -33,7 +33,8 @@ from firewall.core.logger import log
 from firewall.functions import b2u, u2b, PY2
 
 valid_keys = [ "DefaultZone", "MinimalMark", "CleanupOnExit", "Lockdown", 
-               "IPv6_rpfilter", "IndividualCalls", "LogDenied" ]
+               "IPv6_rpfilter", "IndividualCalls", "LogDenied",
+               "LogFirewallDInfo" ]
 
 class firewalld_conf(object):
     def __init__(self, filename):
