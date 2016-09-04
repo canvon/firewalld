@@ -71,6 +71,7 @@ class FirewallD(slip.dbus.service.Object):
         self.busname = args[0]
         self.path = args[1]
         self.start()
+        self.adjust_logging()
         dbus_introspection_prepare_properties(self, config.dbus.DBUS_INTERFACE)
         self.config = FirewallDConfig(self.fw.config, self.busname,
                                       config.dbus.DBUS_PATH_CONFIG)
@@ -92,6 +93,37 @@ class FirewallD(slip.dbus.service.Object):
         #   resets policies
         log.debug1("stop()")
         return self.fw.stop()
+
+    @handle_exceptions
+    def adjust_logging(self):
+        syslog_fmt = "%(label)s%(message)s"
+        # Remember previous log level so we can reset to that.
+        if not self._lfi_prev_log_level:
+            self._lfi_prev_log_level = log.getInfoLogLevel()
+        # Remove log levels added for syslog target.
+        if self._lfi_syslog_target_added_levels:
+            try:
+                log.delInfoLogging("*", log.syslog, self._lfi_syslog_target_added_levels,
+                                   fmt=syslog_fmt)
+                del self._lfi_syslog_target_added_levels
+            except Exception as e:
+                log.debug1("Couldn't remove log levels added for syslog target: %s", e)
+        if self.fw._log_firewalld_info == "NO_INFO":
+            # Reset to previous log level.
+            log.setInfoLogLevel(self._lfi_prev_log_level)
+        else:
+            # Add log levels to syslog target and set new log level.
+            try:
+                info_n = int(self.fw._log_firewalld_info.split("INFO")[-1])
+                log_level = log.NO_INFO + info_n
+            except Exception as e:
+                log.error("Can't extract LogFirewallDInfo's log level INFO<n>'s n: %s", e)
+            else:
+                self._lfi_syslog_target_added_levels = \
+                        [ x for x in range(log.NO_INFO + 1, log_level + 1) ]
+                log.addInfoLogging("*", log.syslog, self._lfi_syslog_target_added_levels,
+                                   fmt=syslog_fmt)
+                log.setInfoLogLevel(log_level)
 
     # lockdown functions
 

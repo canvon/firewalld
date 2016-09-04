@@ -67,16 +67,6 @@ def setup_logging(args):
     log.setDebugLogLevel(log.NO_INFO)
     log.setDebugLogLevel(log.NO_DEBUG)
 
-    if config._log_firewalld_info != "NO_INFO":
-        try:
-            info_n = int(config._log_firewalld_info.split("INFO")[-1])
-            log_level = log.NO_INFO + info_n
-        except Exception as e:
-            log.error("Can't extract LogFirewallDInfo's log level INFO<n>'s n: %s", e)
-        else:
-            log.addInfoLogging("*", log.syslog, [ x for x in range(log.NO_INFO + 1, log_level + 1) ])
-            log.setInfoLogLevel(log_level)
-
     if args.debug:
         log.setInfoLogLevel(log.INFO_MAX)
         log.setDebugLogLevel(args.debug)
