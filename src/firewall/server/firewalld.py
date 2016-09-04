@@ -96,12 +96,13 @@ class FirewallD(slip.dbus.service.Object):
 
     @handle_exceptions
     def adjust_logging(self):
+        log.debug1("adjust_logging()")
         syslog_fmt = "%(label)s%(message)s"
         # Remember previous log level so we can reset to that.
-        if not self._lfi_prev_log_level:
+        if not hasattr(self, '_lfi_prev_log_level'):
             self._lfi_prev_log_level = log.getInfoLogLevel()
         # Remove log levels added for syslog target.
-        if self._lfi_syslog_target_added_levels:
+        if hasattr(self, '_lfi_syslog_target_added_levels'):
             try:
                 log.delInfoLogging("*", log.syslog, self._lfi_syslog_target_added_levels,
                                    fmt=syslog_fmt)
@@ -109,16 +110,17 @@ class FirewallD(slip.dbus.service.Object):
             except Exception as e:
                 log.debug1("Couldn't remove log levels added for syslog target: %s", e)
         if self.fw._log_firewalld_info == "NO_INFO":
-            # Reset to previous log level.
+            log.debug1("Reset to previous log level (%d)", self._lfi_prev_log_level)
             log.setInfoLogLevel(self._lfi_prev_log_level)
         else:
-            # Add log levels to syslog target and set new log level.
             try:
                 info_n = int(self.fw._log_firewalld_info.split("INFO")[-1])
                 log_level = log.NO_INFO + info_n
             except Exception as e:
                 log.error("Can't extract LogFirewallDInfo's log level INFO<n>'s n: %s", e)
             else:
+                log.debug1("Add log levels to syslog target and set new log level '%s' (%d)",
+                           self.fw._log_firewalld_info, log_level)
                 self._lfi_syslog_target_added_levels = \
                         [ x for x in range(log.NO_INFO + 1, log_level + 1) ]
                 log.addInfoLogging("*", log.syslog, self._lfi_syslog_target_added_levels,
