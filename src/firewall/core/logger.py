@@ -572,9 +572,9 @@ class Logger(object):
                     _logging[_level].remove( (domain, target, fmt) )
                     if len(_logging[_level]) == 0:
                         del _logging[_level]
-                        continue
+                    continue
                 if level != self.ALL:
-                    raise ValueError("No mathing logging for " \
+                    raise ValueError("No matching logging for " \
                           "level %d, domain %s, target %s and format %s." % \
                           (_level, domain, target.__class__.__name__, fmt))
         self._genDomains(is_debug)
