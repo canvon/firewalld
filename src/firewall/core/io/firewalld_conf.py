@@ -27,7 +27,8 @@ import shutil
 from firewall.config import ETC_FIREWALLD, \
     FALLBACK_ZONE, FALLBACK_MINIMAL_MARK, \
     FALLBACK_CLEANUP_ON_EXIT, FALLBACK_LOCKDOWN, FALLBACK_IPV6_RPFILTER, \
-    FALLBACK_INDIVIDUAL_CALLS, FALLBACK_LOG_DENIED, LOG_DENIED_VALUES
+    FALLBACK_INDIVIDUAL_CALLS, FALLBACK_LOG_DENIED, LOG_DENIED_VALUES, \
+    FALLBACK_LOG_FIREWALLD_INFO
 from firewall.core.logger import log
 from firewall.functions import b2u, u2b, PY2
 
@@ -80,6 +81,7 @@ class firewalld_conf(object):
             self.set("IPv6_rpfilter","yes" if FALLBACK_IPV6_RPFILTER else "no")
             self.set("IndividualCalls", "yes" if FALLBACK_INDIVIDUAL_CALLS else "no")
             self.set("LogDenied", FALLBACK_LOG_DENIED)
+            self.set("LogFirewallDInfo", FALLBACK_LOG_FIREWALLD_INFO)
             raise
 
         for line in f:
@@ -165,6 +167,15 @@ class firewalld_conf(object):
                 log.warning("LogDenied '%s' is invalid, using default value '%s'",
                             value, FALLBACK_LOG_DENIED)
             self.set("LogDenied", str(FALLBACK_LOG_DENIED))
+
+        # check log firewalld info
+        value = self.get("LogFirewallDInfo")
+        log_level_names = [ "NO_INFO" ] + [ "INFO" + str(x - log.NO_INFO) for x in range(log.NO_INFO + 1, log.INFO_MAX+1) ]
+        if not value or value not in [ "yes", "true", "no", "false" ] + log_level_names:
+            if value is not None:
+                log.warning("LogFirewallDInfo '%s' is invalid, using default value '%s'",
+                            value, FALLBACK_LOG_FIREWALLD_INFO)
+            self.set("LogFirewallDInfo", FALLBACK_LOG_FIREWALLD_INFO)
 
     # save to self.filename if there are key/value changes
     def write(self):

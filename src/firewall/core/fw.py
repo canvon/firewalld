@@ -105,6 +105,7 @@ class Firewall(object):
         self.ipv6_rpfilter_enabled = config.FALLBACK_IPV6_RPFILTER
         self._individual_calls = config.FALLBACK_INDIVIDUAL_CALLS
         self._log_denied = config.FALLBACK_LOG_DENIED
+        self._log_firewalld_info = config.FALLBACK_LOG_FIREWALLD_INFO
 
     def individual_calls(self):
         return self._individual_calls
@@ -235,6 +236,17 @@ class Firewall(object):
                 else:
                     self._log_denied = value.lower()
                     log.debug1("LogDenied is set to '%s'", self._log_denied)
+
+            if self._firewalld_conf.get("LogFirewallDInfo"):
+                value = self._firewalld_conf.get("LogFirewallDInfo")
+                if value is None or value.lower() == "no" or value.lower() == "false":
+                    self._log_firewalld_info = "NO_INFO"
+                elif value.lower() == "yes" or value.lower() == "true":
+                    self._log_firewalld_info = "INFO" + str(log.INFO_MAX - log.NO_INFO)
+                    log.debug1("LogFirewallDInfo is set to '%s'", self._log_firewalld_info)
+                else:
+                    self._log_firewalld_info = value.upper()
+                    log.debug1("LogFirewallDInfo is set to '%s'", self._log_firewalld_info)
 
         self.config.set_firewalld_conf(copy.deepcopy(self._firewalld_conf))
 
